@@ -85,7 +85,15 @@ st.bar_chart(data)
 # Calculate Issue Age. 
 # For Open Issues - this code defines it as time between today and last introduced. 
 # For Resolved - this code defines it as time between LAST_RESOLVED and last_introduced
-# NOTE: This is not Snyk endorsed timing and not necessarily how our own reporting team defines it. 
+# NOTE: The alg calculated in this streamlet demonstrates how you can manipulate data and base calculations off of it. 
+#The true SLA calculation looks similar to the following pseudo logic
+# CASE
+#        WHEN issue_status = 'Resolved' and last_introduced is null THEN datediff('DAY', to_date(first_introduced), to_date(last_disappeared))
+#        WHEN issue_status = 'Resolved' and to_date(first_introduced) < to_date(last_introduced) THEN datediff('DAY', to_date(last_introduced), to_date(last_disappeared))
+#        WHEN issue_status in ('Open', 'Ignored') and last_introduced is null THEN datediff('DAY', to_date(first_introduced), current_date)
+#        WHEN issue_status in ('Open', 'Ignored') and to_date(first_introduced) < to_date(last_introduced) THEN datediff('DAY', to_date(last_introduced), current_date)
+#    END AS issue_age
+#
 df["LAST_INTRODUCED"] = pd.to_datetime(df["LAST_INTRODUCED"])
 df["ISSUE_AGE"] = 0
 resolved_mask = df["ISSUE_STATUS"] == "Resolved"
